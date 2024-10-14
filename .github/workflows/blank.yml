@@ -1,4 +1,4 @@
-name: Add Reviewer as Assignee and Set Project Status
+name: Pull request test
 
 on:
   pull_request:
@@ -9,11 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - env:
-          EVENT_CONTEXT: ${{ toJSON(github.event) }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-          REQUESTED_REVIEWER: ${{ github.event.pull_request.requested_reviewer }}
+          CURRENT_ASSIGNEES: ${{ github.event.pull_request.assignees }}
+          REQUESTED_REVIEWERS: ${{ github.event.pull_request.requested_reviewers }}
         run: |
-          echo $EVENT_CONTEXT
-          gh pr edit $PR_URL --add-assignee $REQUESTED_REVIEWER
-
+          for assignee in $CURRENT_ASSIGNEES; do
+            gh pr edit $PR_URL --remove-assignee $assignee.login
+          done
+          echo "Requested reviewers: $REQUESTED_REVIEWERS"
+          for reviewer in $REQUESTED_REVIEWERS; do
+            gh pr edit $PR_URL --add-assignee $reviewer.login
+          done
