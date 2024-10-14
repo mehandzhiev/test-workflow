@@ -11,21 +11,34 @@ jobs:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get PR number and repo information
+          # Extract PR information
           PR_NUMBER="${{ github.event.pull_request.number }}"
           REPO="${{ github.repository }}"
 
-          # Remove current assignees
-          echo "Removing current assignees..."
-          for assignee in $(jq -r '.pull_request.assignees[].login' <<< "${{ toJson(github.event.pull_request.assignees) }}"); do
-            echo "Removing assignee: $assignee"
-            gh pr edit "$PR_NUMBER" --remove-assignees "$assignee"
-          done
+          # Convert assignees and requested reviewers to JSON
+          ASSIGNEES_JSON='${{ toJson(github.event.pull_request.assignees) }}'
+          REVIEWERS_JSON='${{ toJson(github.event.pull_request.requested_reviewers) }}'
 
-          # Add requested reviewers as assignees
-          echo "Adding requested reviewers as assignees..."
-          for reviewer in $(jq -r '.pull_request.requested_reviewers[].login' <<< "${{ toJson(github.event.pull_request.requested_reviewers) }}"); do
-            echo "Adding reviewer: $reviewer"
-            gh pr edit "$PR_NUMBER" --add-assignees "$reviewer"
-          done
+          # Check if there are any assignees and remove them
+          if [ "$ASSIGNEES_JSON" != "[]" ]; then
+            echo "Removing current assignees..."
+            echo "$ASSIGNEES_JSON" | jq -c '.[]' | while read -r assignee; do
+              ASSIGNEE_LOGIN=$(echo "$assignee" | jq -r '.login')
+              echo "Removing assignee: $ASSIGNEE_LOGIN"
+              gh pr edit "$PR_NUMBER" --remove-assignees "$ASSIGNEE_LOGIN"
+            done
+          else
+            echo "No assignees to remove."
+          fi
 
+          # Check if there are any requested reviewers and add them as assignees
+          if [ "$REVIEWERS_JSON" != "[]" ]; then
+            echo "Adding requested reviewers as assignees..."
+            echo "$REVIEWERS_JSON" | jq -c '.[]' | while read -r reviewer; do
+              REVIEWER_LOGIN=$(echo "$reviewer" | jq -r '.login')
+              echo "Adding reviewer: $REVIEWER_LOGIN"
+              gh pr edit "$PR_NUMBER" --add-assignees "$REVIEWER_LOGIN"
+            done
+          else
+            echo "No reviewers to add as assignees."
+          fi
