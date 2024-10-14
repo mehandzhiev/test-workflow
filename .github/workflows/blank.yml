@@ -15,5 +15,5 @@ jobs:
           REQUESTED_REVIEWER: ${{ github.event.pull_request.requested_reviewer }}
         run: |
           echo $EVENT_CONTEXT
-          gh pr edit $PR_URL --add-assignees $REQUESTED_REVIEWER
+          gh pr edit $PR_URL --add-assignee $REQUESTED_REVIEWER
 
