@@ -11,13 +11,10 @@ jobs:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-          CURRENT_ASSIGNEES: ${{ github.event.pull_request.assignees }}
-          REQUESTED_REVIEWERS: ${{ github.event.pull_request.requested_reviewers }}
         run: |
-          for assignee in $CURRENT_ASSIGNEES; do
+          for assignee in ${{ github.event.pull_request.assignees }}; do
             gh pr edit $PR_URL --remove-assignee $assignee.login
           done
-          echo "Requested reviewers: $REQUESTED_REVIEWERS"
-          for reviewer in $REQUESTED_REVIEWERS; do
+          for reviewer in ${{ github.event.pull_request.requested_reviewers }}; do
             gh pr edit $PR_URL --add-assignee $reviewer.login
           done
