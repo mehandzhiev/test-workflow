@@ -11,6 +11,7 @@ jobs:
       - env:
           EVENT_CONTEXT: ${{ toJSON(github.event) }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
           REQUESTED_REVIEWER: ${{ github.event.pull_request.requested_reviewer }}
         run: |
           echo $EVENT_CONTEXT
