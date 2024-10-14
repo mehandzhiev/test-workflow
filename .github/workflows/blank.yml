@@ -10,9 +10,6 @@ jobs:
     steps:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          CURRENT_ASSIGNEES: ${{ github.event.pull_request.assignees }}
-          REQUESTED_REVIEWERS: ${{ github.event.pull_request.requested_reviewers }}
         run: |
           # Get PR number and repo information
           PR_NUMBER="${{ github.event.pull_request.number }}"
