@@ -25,7 +25,7 @@ jobs:
             echo "$ASSIGNEES_JSON" | jq -c '.[]' | while read -r assignee; do
               ASSIGNEE_LOGIN=$(echo "$assignee" | jq -r '.login')
               echo "Removing assignee: $ASSIGNEE_LOGIN"
-              gh pr edit "$PR_NUMBER" --remove-assignees "$ASSIGNEE_LOGIN"
+              gh pr edit "$PR_NUMBER" --remove-assignee "$ASSIGNEE_LOGIN"
             done
           else
             echo "No assignees to remove."
@@ -37,7 +37,7 @@ jobs:
             echo "$REVIEWERS_JSON" | jq -c '.[]' | while read -r reviewer; do
               REVIEWER_LOGIN=$(echo "$reviewer" | jq -r '.login')
               echo "Adding reviewer: $REVIEWER_LOGIN"
-              gh pr edit "$PR_NUMBER" --add-assignees "$REVIEWER_LOGIN"
+              gh pr edit "$PR_NUMBER" --add-assignee "$REVIEWER_LOGIN"
             done
           else
             echo "No reviewers to add as assignees."
