@@ -12,9 +12,37 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
-          for assignee in ${{ github.event.pull_request.assignees }}; do
-            gh pr edit $PR_URL --remove-assignee $assignee.login
+          name: Pull request test
+
+on:
+  pull_request:
+    types: [ review_requested, review_request_removed ]
+
+jobs:
+  label_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          CURRENT_ASSIGNEES: ${{ github.event.pull_request.assignees }}
+          REQUESTED_REVIEWERS: ${{ github.event.pull_request.requested_reviewers }}
+        run: |
+          # Get PR number and repo information
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+
+          # Remove current assignees
+          echo "Removing current assignees..."
+          for assignee in $(jq -r '.pull_request.assignees[].login' <<< "${{ toJson(github.event.pull_request.assignees) }}"); do
+            echo "Removing assignee: $assignee"
+            gh pr edit "$PR_NUMBER" --remove-assignees "$assignee"
           done
-          for reviewer in ${{ github.event.pull_request.requested_reviewers }}; do
-            gh pr edit $PR_URL --add-assignee $reviewer.login
+
+          # Add requested reviewers as assignees
+          echo "Adding requested reviewers as assignees..."
+          for reviewer in $(jq -r '.pull_request.requested_reviewers[].login' <<< "${{ toJson(github.event.pull_request.requested_reviewers) }}"); do
+            echo "Adding reviewer: $reviewer"
+            gh pr edit "$PR_NUMBER" --add-assignees "$reviewer"
           done
+
