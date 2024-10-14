@@ -1,0 +1,15 @@
+name: Add Reviewer as Assignee and Set Project Status
+
+on:
+  pull_request_review:
+    types: [ submitted, edited, dismissed ]
+
+jobs:
+  label_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo $EVENT_CONTEXT
