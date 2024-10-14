@@ -11,20 +11,6 @@ jobs:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: |
-          name: Pull request test
-
-on:
-  pull_request:
-    types: [ review_requested, review_request_removed ]
-
-jobs:
-  label_issue:
-    runs-on: ubuntu-latest
-    steps:
-      - env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
           CURRENT_ASSIGNEES: ${{ github.event.pull_request.assignees }}
           REQUESTED_REVIEWERS: ${{ github.event.pull_request.requested_reviewers }}
         run: |
